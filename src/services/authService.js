@@ -61,8 +61,8 @@ exports.login = async (email, password) =>{
     return user; 
 }; 
 
-exports.createToken = (user, type)=>{
-    const payload = {type: type, _id: user._id, email: user.email};
+exports.createToken = (user, role)=>{
+    const payload = {role: role, _id: user._id, email: user.email};
     const options = {expiresIn:'2d'}
     const tokenPromise = new Promise((resolve, reject)=>{
         jwt.sign(payload, SECRET, options, (err, decodedToken)=>{
