@@ -78,9 +78,9 @@ exports.createToken = (user, role)=>{
 
 //exports.VerifyToken = async (token) => await tokenHelper.verify(token);
 
-exports.VerifyToken = async (token) =>{
+exports.VerifyToken = (token) =>{
 
-    return await jwt.verify(token, SECRET, (err, decodedToken)=>{
+    return jwt.verify(token, SECRET, (err, decodedToken)=>{
         if (err) {
             res.clearCookie(COOKIE_SESSION_NAME);       
             throw err;
