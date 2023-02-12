@@ -1,69 +1,122 @@
 const Property = require("../models/Property");
+const Claim = require("../models/Claim");
 
 const { normalize } = require('../utils/mongoErrorNormalizer');
 
-exports.create = (property) => Property.create(property)
-    .then(property => property)
-    .catch(err => {
-        const error = normalize('Property creation error!', err);
-        throw error
-    })
+exports.create = async (property) => {
 
-exports.getAll = () => Property.find({}).lean()
-    .then(properties => properties)
-    .catch(err => [])
+    let newProperty;
 
-exports.edit = (property) => Property.findByIdAndUpdate(property._id, property, {
-    runValidators: true,
-    new: true
-})
-    .then(property => property)
-    .catch(err => {
-        const error = normalize('Property editing error!', err);
+    try {
+        newProperty = await Property.create(property)
+        newProperty = newProperty._doc;
+    } catch (err) { throw normalize('Property creation error!', err) }
 
-        throw error
-    })
+    try {
 
-exports.delete = (_id) => Property.findByIdAndDelete(_id)
-    .then(result => result)
-    .catch(err => {
-        const error = normalize('Property deletion error!', err);
-        throw error
-    })
+        if (property.claims) {
+            property.claims = property.claims.map(c => ({ ...c, property_id: newProperty._id }))
+            newProperty.claims = await Claim.create(property.claims)
+        }
 
-exports.getById = (_id) => Property.findById(_id).lean()
-    .then(properties => properties)
-    .catch(err => null)
+        return newProperty
+    } catch (err) { throw normalize('Claims creation error!', err) }
+}
 
-exports.getFiltered = (filter) => {
+exports.getAll = async () => {
+    try {
+        let properties = await Property.find({}).lean();
+
+        properties = await attachClaims(properties)
+
+        return properties
+    } catch (error) { console.log(error); return [] }
+}
+
+exports.edit = async (property) => {
+
+    let updatedProperty;
+
+    try {
+        updatedProperty = await Property.findByIdAndUpdate(property._id, property, {
+            runValidators: true,
+            new: true
+        })
+        updatedProperty = updatedProperty._doc;
+    } catch (err) { throw normalize('Property editing error!', err); }
+
+    try {
+        if (property.claims) {
+
+            property.claims = property.claims.map(c => ({ ...c, property_id: updatedProperty._id }))
+
+            await Claim.deleteMany({ property_id: updatedProperty._id })
+            updatedProperty.claims = await Claim.create(property.claims)
+        }
+
+        return updatedProperty
+    } catch (err) { throw normalize('Claims update error!', err) }
+}
+
+exports.delete = async (_id) => {
+
+    try {
+        await Promise.all([Property.findByIdAndDelete(_id), Claim.deleteMany({ property_id: _id })])
+        return true
+    } catch (err) { throw normalize('Property deletion error!', err) }
+}
+
+exports.getById = async (_id) => {
+    try {
+        const property = await Property.findById(_id).lean()
+
+        if (!property) { return null }
+
+        property.claims = [...(await Claim.find({ property_id: _id }).lean())]
+
+        return property
+    } catch (error) { return null }
+}
+
+exports.getFiltered = async (filter) => {
 
     const findQuery = buildFindQueryByFilter(filter);
 
     const { page, pageSize } = filter
 
     if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
-        return Property.find(findQuery).lean()
-            .skip((page - 1) * pageSize)
-            .limit(pageSize)
-            .then(properties => properties)
-            .catch(err => [])
+
+        try {
+            let properties = await Property.find(findQuery).lean()
+                .skip((page - 1) * pageSize)
+                .limit(pageSize)
+
+            return await attachClaims(properties)
+        } catch (error) { return [] }
     }
 
-    return Property.find(findQuery).lean()
-        .then(properties => properties)
-        .catch(err => [])
+    try {
+        let properties = await Property.find(findQuery).lean()
+
+        return await attachClaims(properties)
+    } catch (error) { return [] }
 }
 
-exports.getRecent = (count) => !isNaN(count) && count > 0
-    ? Property.find()
-        .sort({ postedOn: 'desc' })
-        .limit(count)
-        .lean()
-        .then(properties => properties)
-        .catch(err => [])
-    : new Promise((resolve, reject) => {
-        resolve([]);
-    })
+exports.getRecent = async (count) => {
+    if (!isNaN(count) && count > 0) {
+        try {
+            const properties = await Property.find().lean()
+                .sort({ postedOn: 'desc' })
+                .limit(count)
+            console.log(await attachClaims(properties));
+            return await attachClaims(properties)
+        } catch (error) {
+            return []
+        }
+    } else {
+        return new Promise((resolve, reject) => { resolve([]) })
+    }
+}
 
 exports.getMetadataByFilter = async (filter, isNormalized = false) => {
 
@@ -230,4 +283,20 @@ function buildFindQueryByFilter(filter) {
     }
 
     return findQuery
+}
+
+async function attachClaims(properties) {
+
+    try {
+        properties = properties.map(p => ({ ...p, claims: [] }))
+
+        const claims = await Claim.find({ property_id: { $in: [properties.map(p => p._id)] } }).lean();
+        claims.forEach(c => {
+            const property = properties.find(p => p._id.toString() === c.property_id.toString())
+            property.claims.push(c)
+        })
+
+        return properties
+    } catch (error) { return [] }
+
 }

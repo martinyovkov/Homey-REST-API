@@ -21,6 +21,9 @@ router.get('/recent', async (req, res) => {
     try {
         const count = !isNaN(req.query.count) ? req.query.count : 0
         let properties = await propertyService.getRecent(count)
+        console.log(properties);
+        if (properties.length === 0) { return res.json([])}
+
         const meta = await propertyService.getMetaDataFromProperties(properties)
 
         res.json({ properties, meta })
@@ -50,6 +53,7 @@ router.post('/',
 
         try {
             const property = await propertyService.create(propertyDetails)
+
             res.json(property)
         } catch (error) { res.status(400).json(error) }
     }
