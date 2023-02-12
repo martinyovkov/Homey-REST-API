@@ -60,9 +60,9 @@ router.post('/login', async (req, res) => {
 
 
 router.post('/register/user', async (req, res) => {
-    const { email, firstName, lastName, password, repeatPassword } = req.body;
-
-    if (password !== repeatPassword) {
+    const { email, firstName, lastName, password, rePassword } = req.body;
+    
+    if (password !== rePassword) {
         return res.status(400).json({ status: 400, message: 'Password mismatch!' })
     }
 
@@ -93,9 +93,9 @@ router.post('/register/user', async (req, res) => {
 });
 
 router.post('/register/agency', async (req, res) => {
-    const { email, agencyName, city, address, phoneNumber, password, repeatPassword } = req.body;
+    const { email, agencyName, city, address, phoneNumber, password, rePassword } = req.body;
 
-    if (password !== repeatPassword) {
+    if (password !== rePassword) {
         return res.status(400).json({ status: 400, message: 'Password mismatch!' })
     }
 
