@@ -32,12 +32,12 @@ router.post('/',
 
 router.patch('/:_id',
     Auth,
-    OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
-    IsOwner.bind(null, undefined, 'You need to be owner to edit this property'),
+    OnlyAgency.bind(null, 'Only agencies are allowed to edit properties'),
+    IsOwner.bind(null, searchSources.params, 'You need to be owner to edit this property'),
     async (req, res) => {
 
         const propertyDetails = req.body;
-        propertyDetails._id = req.property_id || req.query._id;
+        propertyDetails._id = req.property_id || req.params._id;
 
         try {
             const property = await propertyService.edit(propertyDetails)
@@ -46,18 +46,13 @@ router.patch('/:_id',
     }
 );
 
-router.delete('/',
+router.delete('/:_id',
     Auth,
-    OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
-    IsOwner.bind(null, 'You need to be owner to edit this property'),
+    OnlyAgency.bind(null, 'Only agencies are allowed to delete properties'),
+    IsOwner.bind(null, searchSources.params, 'You need to be owner to delete this property'),
     async (req, res) => {
-
-        const propertyDetails = req.body;
-
-        propertyDetails.agency_id = req.user._id;
-
         try {
-            const property = await propertyService.edit(propertyDetails)
+            const property = await propertyService.delete(req.property_id || req.params._id)
             res.json(property)
         } catch (error) { res.status(400).json(error) }
     }

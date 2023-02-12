@@ -25,7 +25,7 @@ exports.edit = (property) => Property.findByIdAndUpdate(property._id, property, 
         throw error
     })
 
-exports.delete = (_id) => Property.findByIdAndDelete(property._id)
+exports.delete = (_id) => Property.findByIdAndDelete(_id)
     .then(result => result)
     .catch(err => {
         const error = normalize('Property deletion error!', err);
