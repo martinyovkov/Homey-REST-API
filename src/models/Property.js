@@ -18,7 +18,10 @@ const propertySchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['for_sale', 'for_rent'],
+      enum: {
+        values: ['for_sale', 'for_rent'],
+        message: `{VALUE} not is not a valid status. The possible statuses are ['for_sale', 'for_rent']`
+      },
       required: [true, 'Property status is required!']
     },
     country: {
