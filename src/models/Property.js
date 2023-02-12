@@ -87,7 +87,7 @@ const propertySchema = new Schema(
 
 propertySchema
   .path('yearBuilt')
-  .validate(value => value <= (new Date().getFullYear()), 'Invalid year of building!');
+  .validate(value => value <= (new Date().getFullYear() + 50), 'Invalid year of building!');
 
 propertySchema.pre('save', function (next) {
 
