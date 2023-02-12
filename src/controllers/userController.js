@@ -138,10 +138,11 @@ router.get('/me', async (req, res) => {
     }
 
     try {
-        const decodedToken = await authService.VerifyToken(token);
+        const decodedToken = await authService.verifyAccessToken(token);
         return res.status(200).json({ status: 200, user: { ...decodedToken } })
 
     } catch (error) {
+        res.clearCookie(COOKIE_SESSION_NAME);
         res.status(400).json({ status: 400, ...error });
     }
 });
