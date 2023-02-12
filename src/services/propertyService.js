@@ -6,7 +6,6 @@ exports.create = (property) => Property.create(property)
     .then(property => property)
     .catch(err => {
         const error = normalize('Property creation error!', err);
-        console.log(err);
         throw error
     })
 
@@ -29,7 +28,6 @@ exports.delete = (_id) => Property.findByIdAndDelete(_id)
     .then(result => result)
     .catch(err => {
         const error = normalize('Property deletion error!', err);
-
         throw error
     })
 
