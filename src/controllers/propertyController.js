@@ -65,4 +65,13 @@ router.delete('/:_id',
     }
 );
 
+router.post('/filtered', async (req, res) => {
+
+    try {
+        let properties = await propertyService.getFiltered(req.body)
+        
+        res.json(properties)
+    } catch (error) { console.log(error); res.status(400).json(error) }
+})
+
 module.exports = router;
