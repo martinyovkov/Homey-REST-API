@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 
+const bcrypt = require('bcrypt');
 const validator = require('validator');
 
 const agencySchema = new Schema(
@@ -31,7 +32,12 @@ const agencySchema = new Schema(
     },
     phoneNumber: {
       type: String,
-      match: [/^0[1-9]{1}[0-9]{8}$/, 'Phone number is not valid!'],
+      validate: {
+        validator: function (v) {
+          return validator.isMobilePhone(v);
+        },
+        message: props => `${props.value} is not a valid phone number!`
+      }
     },
 
   });
@@ -50,8 +56,8 @@ agencySchema.pre('save', function (next) {
   const normalizedEmail = validator.normalizeEmail(escapedEmail);
   this.email = normalizedEmail;
 
-  this.agencyName = validator.trim(this.firstName);
-  this.agencyName = validator.escape(this.firstName);
+  this.agencyName = validator.trim(this.agencyName);
+  this.agencyName = validator.escape(this.agencyName);
 
   this.password = validator.escape(this.password);
   this.password = validator.trim(this.password);

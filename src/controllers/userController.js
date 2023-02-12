@@ -1,5 +1,9 @@
 const router = require('express').Router();
+
 const authService = require('../services/authService');
+const agencyService = require('../services/agencyService');
+const userService = require('../services/userService');
+
 const { COOKIE_SESSION_NAME } = require('../../constants');
 
 router.post('/login', async (req, res) => {
@@ -12,8 +16,8 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await authService.login(email, password);
-        const token = await authService.createToken(user, "user");
-
+        const token = await authService.createToken(user, user.role);
+        
         const cookieSettings = { httpOnly: true }
 
         if (process.env.ENVIRONMENT !== 'development') {
@@ -32,17 +36,20 @@ router.post('/login', async (req, res) => {
 });
 
 
-router.post('/register', async (req, res) => {
+router.post('/register/user', async (req, res) => {
     const { email, firstName, lastName, password, repeatPassword } = req.body;
-
 
     if (password !== repeatPassword) {
         return res.status(400).json({ status: 400, message: 'Password mismatch!' })
     }
 
     try {
-        const user = await authService.create({ email, firstName, lastName, password });
-        
+        const agency = await agencyService.getAgencyByEmail(email);
+
+        if (agency) { throw { message: 'This email already exists!' } }
+
+        const user = await authService.create('User', { email, firstName, lastName, password });
+
         const token = await authService.createToken(user, "user");
 
         const cookieSettings = { httpOnly: true }
@@ -55,6 +62,39 @@ router.post('/register', async (req, res) => {
 
         res.cookie(COOKIE_SESSION_NAME, token, cookieSettings);
         res.json({ status: 200, user });
+
+    } catch (error) {
+        res.status(400).json({ status: 400, ...error });
+    }
+
+});
+
+router.post('/register/agency', async (req, res) => {
+    const { email, agencyName, city, address, phoneNumber, password, repeatPassword } = req.body;
+
+    if (password !== repeatPassword) {
+        return res.status(400).json({ status: 400, message: 'Password mismatch!' })
+    }
+
+    try {
+
+        const user = await userService.getUserByEmail(email);
+
+        if (user) { throw { message: 'This email already exists!' } }
+
+        const agency = await authService.create('Agency', { email, agencyName, city, address, phoneNumber, password });
+        
+        const token = await authService.createToken(agency, "agency");
+
+        const cookieSettings = { httpOnly: true }
+
+        if (process.env.ENVIRONMENT !== 'development') {
+            cookieSettings.secure = true
+            cookieSettings.sameSite = 'none'
+        }
+
+        res.cookie(COOKIE_SESSION_NAME, token, cookieSettings);
+        res.json({ status: 200, agency });
 
     } catch (error) {
         res.status(400).json({ status: 400, ...error });

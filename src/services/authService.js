@@ -1,13 +1,19 @@
 const User = require('../models/User');
+const Agency = require('../models/Agency');
+
+const { getUserByEmail } = require('./userService');
+const { getAgencyByEmail } = require('./agencyService');
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { SECRET } = process.env;
 
-exports.create = async (userData) => User.create(userData)
+exports.create = async (role, userData) => (role === 'Agency'
+    ? Agency.create(userData)
+    : User.create(userData))
     .then(user => { return user; })
     .catch(err => {
-
         let error = {};
 
         if (err.name == 'ValidationError') {
@@ -45,10 +51,16 @@ exports.create = async (userData) => User.create(userData)
     });
 
 exports.login = async (email, password) => {
-    const user = await User.findOne({ email });
+    let user = await getUserByEmail(email)
+    let role = 'user';
 
     if (!user) {
-        throw { message: 'Invalid email or password!' };
+        user = await getAgencyByEmail(email)
+        role = 'agency';
+
+        if (!user) {
+            throw { message: 'Invalid email or password!' };
+        }
     }
 
     const isValid = bcrypt.compare(password, user.password);
@@ -57,12 +69,17 @@ exports.login = async (email, password) => {
         throw { message: 'Invalid email or password!' };
     }
 
-    return user;
+    return { role, ...user};
 };
 
 exports.createToken = (user, role) => {
-    const payload = { role: role, _id: user._id, email: user.email };
+
+    const payload = {
+        role: role, ...user
+    };
+
     const options = { expiresIn: '2d' }
+
     const tokenPromise = new Promise((resolve, reject) => {
         jwt.sign(payload, SECRET, options, (err, decodedToken) => {
             if (err) {

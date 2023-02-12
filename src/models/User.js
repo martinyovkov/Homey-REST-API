@@ -27,7 +27,12 @@ const userSchema = new Schema(
     },
     phoneNumber: {
       type: String,
-      match: [/^0[1-9]{1}[0-9]{8}$/, 'Phone number is not valid!'],
+      validate: {
+        validator: function (v) {
+          return validator.isMobilePhone(v);
+        },
+        message: props => `${props.value} is not a valid phone number!`
+      }
     },
     city: {
       type: String,
@@ -37,7 +42,6 @@ const userSchema = new Schema(
       type: String,
       minLength: [3, 'Address should be at least 3 characters long!'],
     }
-
   });
 
 userSchema
@@ -69,7 +73,7 @@ userSchema.pre('save', function (next) {
       this.password = hashedPassword;
 
       next();
-      
+
     });
 
 });
