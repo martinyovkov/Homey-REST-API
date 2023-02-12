@@ -14,6 +14,13 @@ router.get('/', async (req, res) => {
     } catch (error) { res.status(400).json(error) }
 })
 
+router.get('/:_id', async (req, res) => {
+    try {
+        const property = await propertyService.getById(req.params._id)
+        res.json(property)
+    } catch (error) { res.status(400).json(error) }
+})
+
 router.post('/',
     Auth,
     OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
