@@ -15,7 +15,8 @@ exports.getAll = () => Property.find({}).lean()
     .catch(err => [])
 
 exports.edit = (property) => Property.findByIdAndUpdate(property._id, property, {
-    runValidators: true
+    runValidators: true,
+    new: true
 })
     .then(property => property)
     .catch(err => {
@@ -31,3 +32,7 @@ exports.delete = (_id) => Property.findByIdAndDelete(property._id)
 
         throw error
     })
+
+exports.getById = (_id) => Property.findById(_id).lean()
+    .then(properties => properties)
+    .catch(err => null)

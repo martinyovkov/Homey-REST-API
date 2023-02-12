@@ -4,7 +4,7 @@ async function OnlyAgency(errorMessage = 'You are not an agency', req, res, next
         return res.status(401).json({ message: 'You are not logged in!'});
     }
 
-    if (req.user.role != 'agency') {
+    if (req.user.role !== 'agency') {
         return res.status(400).json({ message: errorMessage});
     }
 
