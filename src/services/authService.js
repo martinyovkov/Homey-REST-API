@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { SECRET } = process.env;
+const { COOKIE_SESSION_NAME } = require('../config/constants');
 
 exports.create = async (role, userData) => (role === 'Agency'
     ? Agency.create(userData)

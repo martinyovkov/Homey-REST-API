@@ -4,7 +4,7 @@ const authService = require('../services/authService');
 const agencyService = require('../services/agencyService');
 const userService = require('../services/userService');
 
-const { COOKIE_SESSION_NAME } = require('../../constants');
+const { COOKIE_SESSION_NAME } = require('../config/constants');
 
 router.post('/login', async (req, res) => {
 
