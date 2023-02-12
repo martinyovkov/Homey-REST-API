@@ -5,11 +5,15 @@ const propertySchema = new Schema(
     name: {
       type: String,
       required: [true, 'Property name is required!'],
+      trim: true,
       minLength: [4, 'Property name should be at least 4 characters long!'],
     },
     type: {
       type: String,
-      enum: ['house', 'apartment', 'villa', 'landfield', 'other'],
+      enum: {
+        values: ['house', 'apartment', 'villa', 'landfield', 'other'],
+        message: `{VALUE} not is not a valid type. The possible types are ['house', 'apartment', 'villa', 'landfield', 'other']`
+      },
       required: [true, 'Property type is required!']
     },
     status: {
@@ -20,16 +24,19 @@ const propertySchema = new Schema(
     country: {
       type: String,
       required: [true, 'Property country is required!'],
+      trim: true,
       maxLength: [56, 'Country length cannot be more than 56']
     },
     city: {
       type: String,
       required: [true, 'Property city is required!'],
+      trim: true,
       maxLength: [85, 'City length cannot be more than 85']
     },
     street: {
       type: String,
       required: [true, 'Property street is required!'],
+      trim: true,
       maxLength: [120, 'City length cannot be more than 120']
     },
     number: {
@@ -80,15 +87,17 @@ const propertySchema = new Schema(
 
 propertySchema
   .path('yearBuilt')
-  .validate(value => value > new Date().getFullYear(), 'Invalid year of building!');
+  .validate(value => value <= (new Date().getFullYear()), 'Invalid year of building!');
 
 propertySchema.pre('save', function (next) {
 
-  this.name = this.name.trim();
-  this.country = this.country.trim();
-  this.city = this.city.trim();
-  this.street = this.street.trim();
-  this.description = this.description.trim();
+  this.price = this.price.toFixed(2);
+  this.bedrooms = this.bedrooms.toFixed(0);
+  this.bathrooms = this.bathrooms.toFixed(0);
+  this.garages = this.garages.toFixed(0);
+  this.yearBuilt = this.yearBuilt.toFixed(0);
+
+  if (this.number) { this.number = this.number.toFixed(0); }
 
   next()
 });
