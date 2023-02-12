@@ -2,7 +2,8 @@ const router = require('express').Router();
 
 const Auth = require('../middlewares/authMiddleware');
 const OnlyAgency = require('../middlewares/onlyAgencyMiddleware');
-const IsOwner = require('../middlewares/isOwnerMiddleware')
+
+const { searchSources, IsOwner } = require('../middlewares/isOwnerMiddleware')
 
 const propertyService = require('../services/propertyService');
 
@@ -29,7 +30,23 @@ router.post('/',
     }
 );
 
-router.patch('/',
+router.patch('/:_id',
+    Auth,
+    OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
+    IsOwner.bind(null, undefined, 'You need to be owner to edit this property'),
+    async (req, res) => {
+
+        const propertyDetails = req.body;
+        propertyDetails._id = req.property_id || req.query._id;
+
+        try {
+            const property = await propertyService.edit(propertyDetails)
+            res.json(property)
+        } catch (error) { res.status(400).json(error) }
+    }
+);
+
+router.delete('/',
     Auth,
     OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
     IsOwner.bind(null, 'You need to be owner to edit this property'),

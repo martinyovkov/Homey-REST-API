@@ -1,19 +1,39 @@
 const { getById } = require("../services/propertyService");
 
-async function IsOwner(errorMessage = 'You are not the owner of the property', req, res, next) {
+const searchSources = {
+    params: 'params',
+    body: 'body'
+}
+
+async function IsOwner(searchSource = searchSources.params, errorMessage = 'You are not the owner of the property', req, res, next) {
 
     if (!req.user) {
         return res.status(401).json({ message: 'You are not logged in!' });
     }
 
-    if (!req.body?._id) {
+    if (!req.body?._id && !req.params?._id) {
         return res.status(400).json({ message: 'No property provided!' })
     }
 
-    try {
-        const property = await getById(req.body._id)
+    let _id;
 
-        if (!property) { throw `Property with this _id: ${req.body._id}, does not exists!` }
+    switch (searchSource) {
+        case searchSources.body:
+            _id = req.body?._id
+            break;
+        case searchSources.params:
+            _id = req.params?._id
+            break;
+        default:
+            break;
+    }
+
+    try {
+        req.property_id = _id || req.params._id || req.body._id;
+
+        const property = await getById(req.property_id)
+        
+        if (!property) { throw `Property with this _id: ${req.property_id}, does not exists!` }
 
         if (req.user._id !== property.agency_id.toString()) { throw errorMessage }
 
@@ -24,4 +44,4 @@ async function IsOwner(errorMessage = 'You are not the owner of the property', r
     }
 }
 
-module.exports = IsOwner
+module.exports = { IsOwner, searchSources }
