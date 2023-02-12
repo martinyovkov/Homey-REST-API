@@ -40,7 +40,7 @@ exports.getFiltered = (filter) => {
     const findQuery = buildFindQueryByFilter(filter);
 
     const { page, pageSize } = filter
-    
+
     if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
         return Property.find(findQuery).lean()
             .skip((page - 1) * pageSize)
@@ -53,6 +53,17 @@ exports.getFiltered = (filter) => {
         .then(properties => properties)
         .catch(err => [])
 }
+
+exports.getRecent = (count) => !isNaN(count) && count > 0
+    ? Property.find()
+        .sort({ postedOn: 'desc' })
+        .limit(count)
+        .lean()
+        .then(properties => properties)
+        .catch(err => [])
+    : new Promise((resolve, reject) => {
+        resolve([]);
+    })
 
 function buildFindQueryByFilter(filter) {
 

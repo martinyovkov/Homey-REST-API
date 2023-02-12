@@ -14,11 +14,25 @@ router.get('/', async (req, res) => {
     } catch (error) { res.status(400).json(error) }
 })
 
-router.get('/:_id', async (req, res) => {
+router.post('/filtered', async (req, res) => {
+
     try {
-        const property = await propertyService.getById(req.params._id)
-        res.json(property)
-    } catch (error) { res.status(400).json(error) }
+        let properties = await propertyService.getFiltered(req.body)
+
+        res.json(properties)
+    } catch (error) { console.log(error); res.status(400).json(error) }
+
+})
+
+router.get('/recent', async (req, res) => {
+    
+    try {
+        const count = !isNaN(req.query.count) ? req.query.count : 0
+        let properties = await propertyService.getRecent(count)
+
+        res.json(properties)
+    } catch (error) { console.log(error); res.status(400).json(error) }
+
 })
 
 router.post('/',
@@ -36,6 +50,13 @@ router.post('/',
         } catch (error) { res.status(400).json(error) }
     }
 );
+
+router.get('/:_id', async (req, res) => {
+    try {
+        const property = await propertyService.getById(req.params._id)
+        res.json(property)
+    } catch (error) { res.status(400).json(error) }
+})
 
 router.patch('/:_id',
     Auth,
@@ -64,14 +85,4 @@ router.delete('/:_id',
         } catch (error) { res.status(400).json(error) }
     }
 );
-
-router.post('/filtered', async (req, res) => {
-
-    try {
-        let properties = await propertyService.getFiltered(req.body)
-        
-        res.json(properties)
-    } catch (error) { console.log(error); res.status(400).json(error) }
-})
-
 module.exports = router;
