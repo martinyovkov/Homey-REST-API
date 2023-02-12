@@ -16,23 +16,23 @@ router.get('/', async (req, res) => {
     } catch (error) { res.status(400).json(error) }
 })
 
-router.post('/filtered', async (req, res) => {
-
-    try {
-        let properties = await propertyService.getFiltered(req.body)
-        const meta = await propertyService.getMetadataByFilter(req.body, false)
-
-        res.json({ properties, meta })
-    } catch (error) { console.log(error); res.status(400).json(error) }
-
-})
-
 router.get('/recent', async (req, res) => {
 
     try {
         const count = !isNaN(req.query.count) ? req.query.count : 0
         let properties = await propertyService.getRecent(count)
         const meta = await propertyService.getMetaDataFromProperties(properties)
+
+        res.json({ properties, meta })
+    } catch (error) { console.log(error); res.status(400).json(error) }
+
+})
+
+router.post('/filtered', async (req, res) => {
+
+    try {
+        let properties = await propertyService.getFiltered(req.body)
+        const meta = await propertyService.getMetadataByFilter(req.body, false)
 
         res.json({ properties, meta })
     } catch (error) { console.log(error); res.status(400).json(error) }
