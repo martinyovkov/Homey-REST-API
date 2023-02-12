@@ -5,7 +5,13 @@ const searchSources = {
     body: 'body'
 }
 
-async function IsOwner(searchSource = searchSources.params, errorMessage = 'You are not the owner of the property', req, res, next) {
+async function IsOwner(
+    searchSource = searchSources.params,
+    errorMessage = 'You are not the owner of the property',
+    req,
+    res,
+    next
+) {
 
     if (!req.user) {
         return res.status(401).json({ message: 'You are not logged in!' });
@@ -32,7 +38,7 @@ async function IsOwner(searchSource = searchSources.params, errorMessage = 'You 
         req.property_id = _id || req.params._id || req.body._id;
 
         const property = await getById(req.property_id)
-        
+
         if (!property) { throw `Property with this _id: ${req.property_id}, does not exists!` }
 
         if (req.user._id !== property.agency_id.toString()) { throw errorMessage }
