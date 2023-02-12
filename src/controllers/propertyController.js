@@ -5,6 +5,13 @@ const OnlyAgency = require('../middlewares/onlyAgencyMiddleware');
 
 const propertyService = require('../services/propertyService');
 
+router.get('/', async (req, res) => {
+    try {
+        const properties = await propertyService.getAll()
+        res.json(properties)
+    } catch (error) { res.status(400).json(error) }
+})
+
 router.post('/',
     Auth,
     OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
