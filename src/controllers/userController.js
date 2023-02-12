@@ -1,8 +1,6 @@
 const router = require('express').Router();
 const authService = require('../services/authService');
 const { COOKIE_SESSION_NAME } = require('../../constants');
-//const { isAuth } = require('../middlewares/authMiddleware');
-
 
 router.post('/login', async (req, res) => {
 
@@ -16,13 +14,20 @@ router.post('/login', async (req, res) => {
         const user = await authService.login(email, password);
         const token = await authService.createToken(user, "user");
 
-        res.cookie(COOKIE_SESSION_NAME, token, { httpOnly: true });
+        const cookieSettings = { httpOnly: true }
+
+        if (process.env.ENVIRONMENT !== 'development') {
+            app.set('trust proxy', 1)
+            cookieSettings.secure = true
+            cookieSettings.sameSite = 'none'
+        }
+
+        res.cookie(COOKIE_SESSION_NAME, token, cookieSettings);
         res.status(200).json({ user });
 
     } catch (error) {
         res.status(400).json({ status: 400, ...error });
     }
-
 
 });
 
@@ -37,9 +42,20 @@ router.post('/register', async (req, res) => {
 
     try {
         const user = await authService.create({ email, firstName, lastName, password });
+        
         const token = await authService.createToken(user, "user");
-        res.cookie(COOKIE_SESSION_NAME, token, { httpOnly: true });
+
+        const cookieSettings = { httpOnly: true }
+
+        if (process.env.ENVIRONMENT !== 'development') {
+            app.set('trust proxy', 1)
+            cookieSettings.secure = true
+            cookieSettings.sameSite = 'none'
+        }
+
+        res.cookie(COOKIE_SESSION_NAME, token, cookieSettings);
         res.json({ status: 200, user });
+
     } catch (error) {
         res.status(400).json({ status: 400, ...error });
     }
@@ -60,7 +76,6 @@ router.get('/me', async (req, res) => {
 
     try {
         const decodedToken = await authService.VerifyToken(token);
-        console.log(decodedToken);
         return res.status(200).json({ status: 200, user: { ...decodedToken } })
 
     } catch (error) {
