@@ -27,8 +27,8 @@ const agencySchema = new Schema(
     },
     address: {
       type: String,
-      required: [true, 'Addres is required!'],
-      minLength: [3, 'Country should be at least 3 characters long!'],
+      required: [true, 'Address is required!'],
+      minLength: [3, 'Address should be at least 3 characters long!'],
     },
     phoneNumber: {
       type: String,
