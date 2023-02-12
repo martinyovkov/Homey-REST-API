@@ -16,8 +16,30 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await authService.login(email, password);
-        const token = await authService.createToken(user, user.role);
-        
+
+        const responseUser = {
+            role: user.role,
+            _id: user._id,
+            email: user.email,
+            city: user.city,
+            address: user.address,
+            phoneNumber: user.phoneNumber
+        }
+
+        switch (user.role) {
+            case 'user':
+                responseUser.firstName = user.firstName;
+                responseUser.lastName = user.lastName;
+                break;
+            case 'agency':
+                responseUser.agencyName = user.agencyName;
+                break;
+            default:
+                break;
+        }
+
+        const token = await authService.createToken(responseUser, user.role);
+
         const cookieSettings = { httpOnly: true }
 
         if (process.env.ENVIRONMENT !== 'development') {
@@ -27,7 +49,8 @@ router.post('/login', async (req, res) => {
         }
 
         res.cookie(COOKIE_SESSION_NAME, token, cookieSettings);
-        res.status(200).json({ user });
+
+        res.status(200).json(responseUser);
 
     } catch (error) {
         res.status(400).json({ status: 400, ...error });
@@ -83,7 +106,7 @@ router.post('/register/agency', async (req, res) => {
         if (user) { throw { message: 'This email already exists!' } }
 
         const agency = await authService.create('Agency', { email, agencyName, city, address, phoneNumber, password });
-        
+
         const token = await authService.createToken(agency, "agency");
 
         const cookieSettings = { httpOnly: true }
