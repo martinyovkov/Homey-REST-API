@@ -12,7 +12,7 @@ const { dbInit } = require('./src/config/db.js');
 const app = express();
 
 app.use(require('cors')({
-    origin: '*',
+    origin: process.env.ORIGIN,
     credentials: true
 }))
 
