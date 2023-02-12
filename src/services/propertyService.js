@@ -65,6 +65,117 @@ exports.getRecent = (count) => !isNaN(count) && count > 0
         resolve([]);
     })
 
+exports.getMetadataByFilter = async (filter, isNormalized = false) => {
+
+    if (!isNormalized) { filter = buildFindQueryByFilter(filter) }
+
+    let data = {};
+
+    let pipelineStages = [];
+    pipelineStages.push({ $match: filter });
+
+    pipelineStages.push({
+        $group: {
+            _id: null,
+            minPrice: { $min: '$price' },
+            maxPrice: { $max: '$price' },
+            minYearBuilt: { $min: '$yearBuilt' },
+            maxYearBuilt: { $max: '$yearBuilt' },
+            minSize: { $min: '$size' },
+            maxSize: { $max: '$size' },
+            minBedrooms: { $min: '$bedrooms' },
+            maxBedrooms: { $max: '$bedrooms' },
+            minBathrooms: { $min: '$bathrooms' },
+            maxBathrooms: { $max: '$bathrooms' },
+            minGarages: { $min: '$garages' },
+            maxGarages: { $max: '$garages' },
+            count: { $count: {} }
+        }
+    });
+
+    pipelineStages.push({
+        $project: {
+            _id: 0,
+            minPrice: 1,
+            maxPrice: 1,
+            minYearBuilt: 1,
+            maxYearBuilt: 1,
+            minSize: 1,
+            maxSize: 1,
+            minBedrooms: 1,
+            maxBedrooms: 1,
+            minBathrooms: 1,
+            maxBathrooms: 1,
+            minGarages: 1,
+            maxGarages: 1,
+            count: 1
+        }
+    });
+
+    try {
+        data = (await Property.aggregate([pipelineStages]))[0] || { count: 0 };
+
+        data.pages = filter.pageSize ? Math.ceil(data.count / filter.pageSize) : data.count
+
+        try {
+            data.types = await Property.find(filter)
+                .distinct('type');
+        } catch (err) { data.types = []; }
+
+    } catch (err) { console.log(err); }
+
+    return data;
+}
+
+exports.getMetaDataFromProperties = (properties) => {
+
+    const meta = {
+        minPrice: properties[0].price,
+        maxPrice: properties[0].price,
+        minYearBuilt: properties[0].yearBuilt,
+        maxYearBuilt: properties[0].yearBuilt,
+        minSize: properties[0].size,
+        maxSize: properties[0].size,
+        minBedrooms: properties[0].bedrooms,
+        maxBedrooms: properties[0].bedrooms,
+        minBathrooms: properties[0].bathrooms,
+        maxBathrooms: properties[0].bathrooms,
+        minGarages: properties[0].garages,
+        maxGarages: properties[0].garages,
+        count: properties.length
+    };
+
+    meta.types = properties.reduce((arr, curr) => arr.includes(curr.type) ? arr : [curr.type, ...arr], []);
+
+    if (properties.length > 0) {
+
+        const metaProps = ['minPrice', 'maxPrice', 'minYearBuilt', 'maxYearBuilt', 'minSize', 'maxSize', 'minBedrooms', 'maxBedrooms', 'minBathrooms', 'maxBathrooms', 'minGarages', 'maxGarages'];
+
+        metaProps.forEach(prop => {
+            const propertyProperty = prop.slice(3);
+            propertyProperty[0] = propertyProperty[0].toLowerCase();
+
+            if (prop.slice(0, 4) === 'min') {
+                meta[prop] = properties
+                    .reduce((prev, curr) => prev < curr[propertyProperty]
+                        ? prev
+                        : curr[propertyProperty]
+                        , properties[0][propertyProperty]
+                    );
+            } else if (prop.slice(0, 4) === 'max') {
+                meta[prop] = properties
+                    .reduce((prev, curr) => prev > curr[propertyProperty]
+                        ? prev
+                        : curr[propertyProperty]
+                        , properties[0][propertyProperty]
+                    );
+            }
+        })
+    }
+
+    return meta;
+}
+
 function buildFindQueryByFilter(filter) {
 
     const findQuery = {};
