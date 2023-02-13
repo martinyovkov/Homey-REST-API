@@ -79,7 +79,7 @@ router.post('/filtered', async (req, res) => {
 
         properties = await attachImages(properties)
         properties = await attachClaims(properties);
-
+        
         const meta = await propertyService.getMetadataByFilter(req.body, false)
 
         res.json({ properties, meta })

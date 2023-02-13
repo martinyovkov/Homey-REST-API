@@ -120,6 +120,9 @@ exports.getTop = async (count) => {
 
 exports.getMetadataByFilter = async (filter, isNormalized = false) => {
 
+    const page = filter.page;
+    const pageSize = filter.pageSize;
+
     if (!isNormalized) { filter = buildFindQueryByFilter(filter) }
 
     let data = {};
@@ -168,7 +171,7 @@ exports.getMetadataByFilter = async (filter, isNormalized = false) => {
     try {
         data = (await Property.aggregate([pipelineStages]))[0] || { count: 0 };
 
-        data.pages = filter.pageSize ? Math.ceil(data.count / filter.pageSize) : data.count
+        data.pages = pageSize ? Math.ceil(data.count / pageSize) : data.count
 
         try {
             data.types = await Property.find(filter)
