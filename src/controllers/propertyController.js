@@ -92,13 +92,13 @@ router.post('/',
 
             if (err) {
                 await propertyService.delete(property._id)
-                return res.json(err.message)
+                return res.json({ message: err.message })
             }
 
             if (!req.files) { return res.json({ message: 'Property should have images!' }) }
 
             try { req.files.forEach(file => { imagesService.create(file.filename, property._id) }) }
-            catch (error) { return res.json(error) }
+            catch (error) { return res.json({ message: error }) }
 
             property.images = req.files.map(f => f.filename);
 
@@ -111,25 +111,41 @@ router.patch('/:_id',
     Auth,
     OnlyAgency.bind(null, 'Only agencies are allowed to edit properties'),
     IsOwner.bind(null, searchSources.params, 'You need to be owner to edit this property'),
-    async (req, res) => {
+    (req, res) => {
+        uploadImage(req, res, async function (err) {
 
-        const propertyDetails = req.body;
-        propertyDetails._id = req.property_id || req.params._id;
+            if (err) { return res.json({ message: err.message }) }
 
-        try {
-            const property = await propertyService.edit(propertyDetails)
+            const propertyDetails = req.body;
+            propertyDetails._id = req.property_id || req.params._id;
 
-            if (propertyDetails.claims) {
+            let property;
 
-                propertyDetails.claims = propertyDetails.claims.map(c => ({ ...c, property_id: property._id }))
-                await claimsService.deleteAllByProperty(propertyDetails._id);
-                property.claims = await claimsService.create(propertyDetails.claims)
+            try {
+                property = await propertyService.edit(propertyDetails)
+
+                if (propertyDetails.claims) {
+
+                    propertyDetails.claims = propertyDetails.claims.map(c => ({ ...c, property_id: property._id }))
+                    await claimsService.deleteAllByProperty(propertyDetails._id);
+                    property.claims = await claimsService.create(propertyDetails.claims)
+                }
+            } catch (error) {
+                req.files.forEach(f => { deleteFile('images', f.filename) })
+
+                return res.status(400).json(error)
             }
-            
+
+            if (!req.files) { return res.json({ message: 'Property should have images!' }) }
+
+            try { await imagesService.replace(req.files.map(f => f.filename), property._id) }
+            catch (error) { return res.json(error) }
+
+            property.images = req.files.map(f => f.filename);
+
+            property = await attachClaims([property])
             res.json(property)
-        } catch (error) { 
-            console.log(error);
-            res.status(400).json(error) }
+        })
     }
 );
 
