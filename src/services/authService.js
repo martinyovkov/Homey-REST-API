@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const Agency = require('../models/Agency');
 
+const util = require('util');
+
 const { getUserByEmail } = require('./userService');
 const { getAgencyByEmail } = require('./agencyService');
 
@@ -8,6 +10,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { SECRET } = process.env;
+const { COOKIE_SESSION_NAME } = require('../config/constants');
 
 exports.create = async (role, userData) => (role === 'Agency'
     ? Agency.create(userData)
@@ -91,14 +94,5 @@ exports.createToken = (user, role) => {
     return tokenPromise;
 }
 
-exports.VerifyToken = (token) => {
-
-    return jwt.verify(token, SECRET, (err, decodedToken) => {
-        if (err) {
-            res.clearCookie(COOKIE_SESSION_NAME);
-            throw err;
-        }
-
-        return decodedToken;
-    });
-}
+const verifyJWTPromisified = util.promisify(jwt.verify);
+exports.verifyAccessToken = (token) => verifyJWTPromisified(token, process.env.SECRET)
