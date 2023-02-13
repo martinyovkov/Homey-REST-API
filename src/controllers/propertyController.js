@@ -23,14 +23,14 @@ router.get('/meta', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const properties = await propertyService.getAll()
+        let properties = await propertyService.getAll()
         const meta = await propertyService.getMetadataByFilter({}, false)
 
         properties = await attachImages(properties)
         properties = await attachClaims(properties);
 
         res.json({ properties, meta })
-    } catch (error) { res.status(400).json(error) }
+    } catch (error) { console.log(error); res.status(400).json(error) }
 })
 
 router.get('/recent', async (req, res) => {
@@ -71,7 +71,7 @@ router.get('/top', async (req, res) => {
 
 router.get('/:_id', async (req, res) => {
     try {
-        const property = await propertyService.getById(req.params._id)
+        let property = await propertyService.getById(req.params._id)
 
         property = await attachImages([property])
         property = await attachClaims([property]);
