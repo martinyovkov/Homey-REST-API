@@ -13,6 +13,14 @@ const { deleteFile } = require('../services/gridFsFilesService');
 const imagesService = require('../services/imageService');
 const claimsService = require('../services/claimsService');
 
+router.get('/meta', async (req, res) => {
+    try {
+        
+        res.json(await propertyService.getMetaForAll(req.query?.pageSize))
+
+    } catch (error) { res.json(error) }
+})
+
 router.get('/', async (req, res) => {
     try {
         const properties = await propertyService.getAll()
@@ -79,7 +87,7 @@ router.post('/filtered', async (req, res) => {
 
         properties = await attachImages(properties)
         properties = await attachClaims(properties);
-        
+
         const meta = await propertyService.getMetadataByFilter(req.body, false)
 
         res.json({ properties, meta })

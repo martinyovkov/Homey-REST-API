@@ -107,7 +107,7 @@ exports.getTop = async (count) => {
                 Property.find({}).lean().sort({ bathrooms: 'desc' }).limit(1),
                 Property.find({}).lean().sort({ garages: 'desc' }).limit(1)
             ])
-            
+
             return topProperties.map(p => p[0])
 
         } catch (error) {
@@ -117,6 +117,9 @@ exports.getTop = async (count) => {
         return new Promise((resolve, reject) => { resolve([]) })
     }
 }
+
+exports.getMetaForAll = (pageSize) => this.getMetadataByFilter({ pageSize })
+    .then(data => data)
 
 exports.getMetadataByFilter = async (filter, isNormalized = false) => {
 
