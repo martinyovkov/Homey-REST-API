@@ -189,8 +189,10 @@ async function attachImages(properties) {
 
         const images = await imagesService.getByProperties(properties)
         images.forEach(i => {
-            const property = properties.find(p => p._id.toString() === i.property_id.toString())
-            property.images.push(i.filename)
+
+            properties.filter(p => p._id.toString() === i.property_id.toString())
+                .forEach(p => p.images.push(i.filename))
+
         })
 
         return properties
@@ -208,8 +210,10 @@ async function attachClaims(properties) {
 
         const claims = await claimsService.getByProperties(properties);
         claims.forEach(c => {
-            const property = properties.find(p => p._id.toString() === c.property_id.toString())
-            property.claims.push(c)
+
+            properties.filter(p => p._id.toString() === c.property_id.toString())
+                .forEach(p => p.claims.push(c))
+
         })
 
         return properties

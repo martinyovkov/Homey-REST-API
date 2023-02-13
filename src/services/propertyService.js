@@ -183,18 +183,18 @@ exports.getMetadataByFilter = async (filter, isNormalized = false) => {
 exports.getMetaDataFromProperties = (properties) => {
 
     const meta = {
-        minPrice: properties[0].price,
-        maxPrice: properties[0].price,
-        minYearBuilt: properties[0].yearBuilt,
-        maxYearBuilt: properties[0].yearBuilt,
-        minSize: properties[0].size,
-        maxSize: properties[0].size,
-        minBedrooms: properties[0].bedrooms,
-        maxBedrooms: properties[0].bedrooms,
-        minBathrooms: properties[0].bathrooms,
-        maxBathrooms: properties[0].bathrooms,
-        minGarages: properties[0].garages,
-        maxGarages: properties[0].garages,
+        minPrice: properties[0]?.price,
+        maxPrice: properties[0]?.price,
+        minYearBuilt: properties[0]?.yearBuilt,
+        maxYearBuilt: properties[0]?.yearBuilt,
+        minSize: properties[0]?.size,
+        maxSize: properties[0]?.size,
+        minBedrooms: properties[0]?.bedrooms,
+        maxBedrooms: properties[0]?.bedrooms,
+        minBathrooms: properties[0]?.bathrooms,
+        maxBathrooms: properties[0]?.bathrooms,
+        minGarages: properties[0]?.garages,
+        maxGarages: properties[0]?.garages,
         count: properties.length
     };
 
