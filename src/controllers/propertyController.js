@@ -43,6 +43,24 @@ router.get('/recent', async (req, res) => {
 
 })
 
+router.get('/top', async (req, res) => {
+
+    try {
+        const count = !isNaN(req.query.count) ? req.query.count : 0
+        let properties = await propertyService.getTop(count)
+
+        if (properties.length === 0) { return res.json([]) }
+
+        properties = await attachImages(properties)
+        properties = await attachClaims(properties);
+
+        const meta = await propertyService.getMetaDataFromProperties(properties)
+
+        res.json({ properties, meta })
+    } catch (error) { console.log(error); res.status(400).json(error) }
+
+})
+
 router.get('/:_id', async (req, res) => {
     try {
         const property = await propertyService.getById(req.params._id)

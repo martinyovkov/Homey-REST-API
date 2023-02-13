@@ -95,6 +95,29 @@ exports.getRecent = async (count) => {
     }
 }
 
+exports.getTop = async (count) => {
+    if (!isNaN(count) && count > 0) {
+        try {
+
+            const topProperties = await Promise.all([
+                Property.find({}).lean().sort({ price: 'desc' }).limit(1),
+                Property.find({}).lean().sort({ size: 'desc' }).limit(1),
+                Property.find({}).lean().sort({ yearBuilt: 'desc' }).limit(1),
+                Property.find({}).lean().sort({ bedrooms: 'desc' }).limit(1),
+                Property.find({}).lean().sort({ bathrooms: 'desc' }).limit(1),
+                Property.find({}).lean().sort({ garages: 'desc' }).limit(1)
+            ])
+            
+            return topProperties.map(p => p[0])
+
+        } catch (error) {
+            return []
+        }
+    } else {
+        return new Promise((resolve, reject) => { resolve([]) })
+    }
+}
+
 exports.getMetadataByFilter = async (filter, isNormalized = false) => {
 
     if (!isNormalized) { filter = buildFindQueryByFilter(filter) }
