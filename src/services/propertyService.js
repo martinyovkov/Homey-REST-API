@@ -37,7 +37,7 @@ exports.edit = async (property) => {
             runValidators: true,
             new: true
         })
-        
+
         return updatedProperty._doc;
     } catch (err) { throw normalize('Property editing error!', err); }
 }
@@ -182,17 +182,17 @@ exports.getMetaDataFromProperties = (properties) => {
         const metaProps = ['minPrice', 'maxPrice', 'minYearBuilt', 'maxYearBuilt', 'minSize', 'maxSize', 'minBedrooms', 'maxBedrooms', 'minBathrooms', 'maxBathrooms', 'minGarages', 'maxGarages'];
 
         metaProps.forEach(prop => {
-            const propertyProperty = prop.slice(3);
-            propertyProperty[0] = propertyProperty[0].toLowerCase();
+            let propertyProperty = prop.slice(3);
+            propertyProperty = propertyProperty.charAt(0).toLowerCase() + propertyProperty.slice(1)
 
-            if (prop.slice(0, 4) === 'min') {
+            if (prop.slice(0, 3) === 'min') {
                 meta[prop] = properties
                     .reduce((prev, curr) => prev < curr[propertyProperty]
                         ? prev
                         : curr[propertyProperty]
                         , properties[0][propertyProperty]
                     );
-            } else if (prop.slice(0, 4) === 'max') {
+            } else if (prop.slice(0, 3) === 'max') {
                 meta[prop] = properties
                     .reduce((prev, curr) => prev > curr[propertyProperty]
                         ? prev
