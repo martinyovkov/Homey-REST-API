@@ -24,7 +24,7 @@ exports.create = async (property) => {
 }
 
 exports.getAll = async () => {
-    try { return await Property.find({}).populate('agency_id').lean() }
+    try { return await Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean() }
     catch (error) { return [] }
 }
 
@@ -51,7 +51,7 @@ exports.delete = async (_id) => {
 
 exports.getById = async (_id) => {
     try {
-        const property = await Property.findById(_id).populate('agency_id').lean()
+        const property = await Property.findById(_id).populate({ path: 'agency_id', select: '-password'}).lean()
 
         if (!property) { return null }
 
@@ -68,14 +68,14 @@ exports.getFiltered = async (filter) => {
     if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
 
         try {
-            return await Property.find(findQuery).populate('agency_id').lean()
+            return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password'}).lean()
                 .skip((page - 1) * pageSize)
                 .limit(pageSize)
 
         } catch (error) { return [] }
     }
 
-    try { return await Property.find(findQuery).populate('agency_id').lean() }
+    try { return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password'}).lean() }
     catch (error) { return [] }
 }
 
@@ -83,7 +83,7 @@ exports.getRecent = async (count) => {
     if (!isNaN(count) && count > 0) {
         try {
 
-            return await Property.find().populate('agency_id').lean()
+            return await Property.find().populate({ path: 'agency_id', select: '-password'}).lean()
                 .sort({ postedOn: 'desc' })
                 .limit(count)
 
@@ -100,12 +100,12 @@ exports.getTop = async (count) => {
         try {
 
             const topProperties = await Promise.all([
-                Property.find({}).populate('agency_id').lean().sort({ price: 'desc' }).limit(1),
-                Property.find({}).populate('agency_id').lean().sort({ size: 'desc' }).limit(1),
-                Property.find({}).populate('agency_id').lean().sort({ yearBuilt: 'desc' }).limit(1),
-                Property.find({}).populate('agency_id').lean().sort({ bedrooms: 'desc' }).limit(1),
-                Property.find({}).populate('agency_id').lean().sort({ bathrooms: 'desc' }).limit(1),
-                Property.find({}).populate('agency_id').lean().sort({ garages: 'desc' }).limit(1)
+                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ price: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ size: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ yearBuilt: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ bedrooms: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ bathrooms: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ garages: 'desc' }).limit(1)
             ])
 
             return topProperties.map(p => p[0])
