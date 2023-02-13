@@ -40,7 +40,7 @@ const propertySchema = new Schema(
       type: String,
       required: [true, 'Property street is required!'],
       trim: true,
-      maxLength: [120, 'City length cannot be more than 120']
+      maxLength: [120, 'Street length cannot be more than 120']
     },
     number: {
       type: Number,
