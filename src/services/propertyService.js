@@ -24,13 +24,8 @@ exports.create = async (property) => {
 }
 
 exports.getAll = async () => {
-    try {
-        let properties = await Property.find({}).lean();
-
-        properties = await attachClaims(properties)
-
-        return properties
-    } catch (error) { console.log(error); return [] }
+    try { return await Property.find({}).lean() }
+    catch (error) { console.log(error); return [] }
 }
 
 exports.edit = async (property) => {
@@ -42,26 +37,14 @@ exports.edit = async (property) => {
             runValidators: true,
             new: true
         })
-        updatedProperty = updatedProperty._doc;
+
+        return updatedProperty._doc;
     } catch (err) { throw normalize('Property editing error!', err); }
-
-    try {
-        if (property.claims) {
-
-            property.claims = property.claims.map(c => ({ ...c, property_id: updatedProperty._id }))
-
-            await Claim.deleteMany({ property_id: updatedProperty._id })
-            updatedProperty.claims = await Claim.create(property.claims)
-        }
-
-        return updatedProperty
-    } catch (err) { throw normalize('Claims update error!', err) }
 }
 
 exports.delete = async (_id) => {
-
     try {
-        await Promise.all([Property.findByIdAndDelete(_id), Claim.deleteMany({ property_id: _id })])
+        await Property.findByIdAndDelete(_id)
         return true
     } catch (err) { throw normalize('Property deletion error!', err) }
 }
@@ -71,8 +54,6 @@ exports.getById = async (_id) => {
         const property = await Property.findById(_id).lean()
 
         if (!property) { return null }
-
-        property.claims = [...(await Claim.find({ property_id: _id }).lean())]
 
         return property
     } catch (error) { return null }
@@ -87,29 +68,25 @@ exports.getFiltered = async (filter) => {
     if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
 
         try {
-            let properties = await Property.find(findQuery).lean()
+            return await Property.find(findQuery).lean()
                 .skip((page - 1) * pageSize)
                 .limit(pageSize)
 
-            return await attachClaims(properties)
         } catch (error) { return [] }
     }
 
-    try {
-        let properties = await Property.find(findQuery).lean()
-
-        return await attachClaims(properties)
-    } catch (error) { return [] }
+    try { return await Property.find(findQuery).lean() }
+    catch (error) { return [] }
 }
 
 exports.getRecent = async (count) => {
     if (!isNaN(count) && count > 0) {
         try {
-            const properties = await Property.find().lean()
+
+            return await Property.find().lean()
                 .sort({ postedOn: 'desc' })
                 .limit(count)
-            console.log(await attachClaims(properties));
-            return await attachClaims(properties)
+
         } catch (error) {
             return []
         }
@@ -205,17 +182,17 @@ exports.getMetaDataFromProperties = (properties) => {
         const metaProps = ['minPrice', 'maxPrice', 'minYearBuilt', 'maxYearBuilt', 'minSize', 'maxSize', 'minBedrooms', 'maxBedrooms', 'minBathrooms', 'maxBathrooms', 'minGarages', 'maxGarages'];
 
         metaProps.forEach(prop => {
-            const propertyProperty = prop.slice(3);
-            propertyProperty[0] = propertyProperty[0].toLowerCase();
+            let propertyProperty = prop.slice(3);
+            propertyProperty = propertyProperty.charAt(0).toLowerCase() + propertyProperty.slice(1)
 
-            if (prop.slice(0, 4) === 'min') {
+            if (prop.slice(0, 3) === 'min') {
                 meta[prop] = properties
                     .reduce((prev, curr) => prev < curr[propertyProperty]
                         ? prev
                         : curr[propertyProperty]
                         , properties[0][propertyProperty]
                     );
-            } else if (prop.slice(0, 4) === 'max') {
+            } else if (prop.slice(0, 3) === 'max') {
                 meta[prop] = properties
                     .reduce((prev, curr) => prev > curr[propertyProperty]
                         ? prev
@@ -283,20 +260,4 @@ function buildFindQueryByFilter(filter) {
     }
 
     return findQuery
-}
-
-async function attachClaims(properties) {
-
-    try {
-        properties = properties.map(p => ({ ...p, claims: [] }))
-
-        const claims = await Claim.find({ property_id: { $in: [properties.map(p => p._id)] } }).lean();
-        claims.forEach(c => {
-            const property = properties.find(p => p._id.toString() === c.property_id.toString())
-            property.claims.push(c)
-        })
-
-        return properties
-    } catch (error) { return [] }
-
 }
