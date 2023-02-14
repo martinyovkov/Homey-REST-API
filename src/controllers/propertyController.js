@@ -165,13 +165,11 @@ router.patch('/:_id',
             propertyDetails._id = req.property_id || req.params._id;
 
             let property;
-
             try {
                 property = await propertyService.edit(propertyDetails)
-
+                
                 if (propertyDetails.claims) {
-
-                    propertyDetails.claims = propertyDetails.claims.map(c => ({ ...c, property_id: property._id }))
+                    propertyDetails.claims = propertyDetails.claims.map(c => ({ name: c, value: c, property_id: property._id }))
                     await claimsService.deleteAllByProperty(propertyDetails._id);
                     property.claims = await claimsService.create(propertyDetails.claims)
                 }
