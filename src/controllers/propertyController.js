@@ -72,9 +72,9 @@ router.get('/top', async (req, res) => {
 router.get('/:_id', async (req, res) => {
     try {
         let property = await propertyService.getById(req.params._id)
-
+        
         property = await attachImages([property])
-        property = await attachClaims([property]);
+        property = await attachClaims(property);
 
         res.json(property)
     } catch (error) { res.status(400).json(error) }
@@ -231,7 +231,7 @@ async function attachImages(properties) {
 }
 
 async function attachClaims(properties) {
-
+    
     try {
         properties = properties.map(p => ({ ...p, claims: [] }))
 
@@ -242,7 +242,7 @@ async function attachClaims(properties) {
                 .forEach(p => p.claims.push(c))
 
         })
-
+        console.log(claims);
         return properties
     } catch (error) { return [] }
 
