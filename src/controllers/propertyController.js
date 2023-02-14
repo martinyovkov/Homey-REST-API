@@ -242,7 +242,7 @@ async function attachClaims(properties) {
                 .forEach(p => p.claims.push(c))
 
         })
-        console.log(claims);
+        
         return properties
     } catch (error) { return [] }
 
