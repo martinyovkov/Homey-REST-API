@@ -7,6 +7,7 @@ const propertySchema = new Schema(
       required: [true, 'Property name is required!'],
       trim: true,
       minLength: [4, 'Property name should be at least 4 characters long!'],
+      maxLength: [200, 'Property name cannot be more than 200 characters long!'],
     },
     type: {
       type: String,

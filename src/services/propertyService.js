@@ -1,30 +1,13 @@
 const Property = require("../models/Property");
-const Claim = require("../models/Claim");
 
 const { normalize } = require('../utils/mongoErrorNormalizer');
 
-exports.create = async (property) => {
-
-    let newProperty;
-
-    try {
-        newProperty = await Property.create(property)
-        newProperty = newProperty._doc;
-    } catch (err) { throw normalize('Property creation error!', err) }
-
-    try {
-
-        if (property.claims) {
-            property.claims = property.claims.map(c => ({ ...c, property_id: newProperty._id }))
-            newProperty.claims = await Claim.create(property.claims)
-        }
-
-        return newProperty
-    } catch (err) { throw normalize('Claims creation error!', err) }
-}
+exports.create = async (property) => Property.create(property)
+    .then(property => property)
+    .catch(err => { throw normalize('Property creation error!', err) })
 
 exports.getAll = async () => {
-    try { return await Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean() }
+    try { return await Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean() }
     catch (error) { return [] }
 }
 
@@ -51,7 +34,7 @@ exports.delete = async (_id) => {
 
 exports.getById = async (_id) => {
     try {
-        const property = await Property.findById(_id).populate({ path: 'agency_id', select: '-password'}).lean()
+        const property = await Property.findById(_id).populate({ path: 'agency_id', select: '-password' }).lean()
 
         if (!property) { return null }
 
@@ -68,14 +51,14 @@ exports.getFiltered = async (filter) => {
     if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
 
         try {
-            return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password'}).lean()
+            return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password' }).lean()
                 .skip((page - 1) * pageSize)
                 .limit(pageSize)
 
         } catch (error) { return [] }
     }
 
-    try { return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password'}).lean() }
+    try { return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password' }).lean() }
     catch (error) { return [] }
 }
 
@@ -83,7 +66,7 @@ exports.getRecent = async (count) => {
     if (!isNaN(count) && count > 0) {
         try {
 
-            return await Property.find().populate({ path: 'agency_id', select: '-password'}).lean()
+            return await Property.find().populate({ path: 'agency_id', select: '-password' }).lean()
                 .sort({ postedOn: 'desc' })
                 .limit(count)
 
@@ -100,12 +83,12 @@ exports.getTop = async (count) => {
         try {
 
             const topProperties = await Promise.all([
-                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ price: 'desc' }).limit(1),
-                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ size: 'desc' }).limit(1),
-                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ yearBuilt: 'desc' }).limit(1),
-                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ bedrooms: 'desc' }).limit(1),
-                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ bathrooms: 'desc' }).limit(1),
-                Property.find({}).populate({ path: 'agency_id', select: '-password'}).lean().sort({ garages: 'desc' }).limit(1)
+                Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean().sort({ price: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean().sort({ size: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean().sort({ yearBuilt: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean().sort({ bedrooms: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean().sort({ bathrooms: 'desc' }).limit(1),
+                Property.find({}).populate({ path: 'agency_id', select: '-password' }).lean().sort({ garages: 'desc' }).limit(1)
             ])
 
             return topProperties.map(p => p[0])

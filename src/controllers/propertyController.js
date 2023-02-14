@@ -6,7 +6,7 @@ const { searchSources, IsOwner } = require('../middlewares/isOwnerMiddleware')
 
 const { uploadToGridFS } = require('../middlewares/uploadMiddleware');
 const uploadImage = uploadToGridFS(['image/jpeg', 'image/x-png', 'image/png'], 'images')
-    .array("images")
+    .array("image")
 
 const propertyService = require('../services/propertyService');
 const { deleteFile } = require('../services/gridFsFilesService');
@@ -15,7 +15,7 @@ const claimsService = require('../services/claimsService');
 
 router.get('/meta', async (req, res) => {
     try {
-        
+
         res.json(await propertyService.getMetaForAll(req.query?.pageSize))
 
     } catch (error) { res.json(error) }
@@ -108,7 +108,6 @@ router.post('/',
 
             try { property = await propertyService.create(propertyDetails) }
             catch (error) {
-
                 if (!err) {
                     req.files.forEach(f => { deleteFile('images', f.filename) })
                 }
@@ -123,11 +122,31 @@ router.post('/',
 
             if (!req.files) { return res.json({ message: 'Property should have images!' }) }
 
+            try {
+                if (propertyDetails.claims) {
+                    try {
+                        claimsService.create(propertyDetails.claims
+                            .map(claim => ({ name: claim, value: claim, property_id: property._id }))
+                        )
+                    } catch (error) {
+                        await propertyService.delete(property._id)
+                        return res.json({ message: err.message })
+                    }
+                }
+
+            } catch (error) {
+                if (!err) {
+                    req.files.forEach(f => { deleteFile('images', f.filename) })
+                }
+
+                return res.status(400).json(error)
+            }
+
             try { req.files.forEach(file => { imagesService.create(file.filename, property._id) }) }
             catch (error) { return res.json({ message: error }) }
 
             property.images = req.files.map(f => f.filename);
-
+            
             res.json(property)
         })
     }

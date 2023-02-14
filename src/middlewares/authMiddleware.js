@@ -5,7 +5,7 @@ const { verifyAccessToken } = require('../services/authService');
 async function Auth(req, res, next) {
 
     const token = req.cookies[COOKIE_SESSION_NAME];
-
+    
     if (!token) { return res.status(401).json({ message: 'Unauthorized' }) }
 
     try {

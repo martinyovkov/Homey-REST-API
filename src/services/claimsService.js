@@ -2,9 +2,9 @@ const Claim = require("../models/Claim");
 
 const { normalize } = require("../utils/mongoErrorNormalizer");
 
-exports.create = (claim) => Claim.create(claim)
+exports.create = (claims) => Claim.create(claims)
     .then(claim => claim)
-    .catch(err => { throw normalize('Claim creation error!', err) })
+    .catch(err => { throw normalize('Claims creation error!', err) })
 
 exports.deleteAllByProperty = (property_id) => Claim.deleteMany({ property_id })
 
