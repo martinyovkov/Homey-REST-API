@@ -127,7 +127,8 @@ router.post('/register/agency', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-    res.clearCookie(COOKIE_SESSION_NAME);
+    console.log(req.cookies[COOKIE_SESSION_NAME]);
+    res.clearCookie(COOKIE_SESSION_NAME, { path: '/' });
     res.status(200).json({ message: 'Logged out!' })
 });
 
