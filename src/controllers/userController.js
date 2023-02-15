@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(400).json({ status: 400, error });
+        res.status(400).json({ status: 400, ...error });
     }
 
 });
@@ -73,7 +73,16 @@ router.post('/register/user', async (req, res) => {
 
         const user = await authService.create('User', { email, firstName, lastName, password });
 
-        const token = await authService.createToken(user, "user");
+        const responseUser = {
+            role: 'user',
+            _id: user._id,
+            email: user.email,
+            city: user.city,
+            firstName: user.firstName,
+            lastName: user.lastName
+        }
+        
+        const token = await authService.createToken(responseUser, "user");
 
         const cookieSettings = { httpOnly: true }
 
@@ -87,7 +96,7 @@ router.post('/register/user', async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(400).json({ status: 400, error });
+        res.status(400).json({ status: 400, ...error });
     }
 
 });
@@ -106,8 +115,18 @@ router.post('/register/agency', async (req, res) => {
         if (user) { throw { message: 'This email already exists!' } }
 
         const agency = await authService.create('Agency', { email, agencyName, city, address, phoneNumber, password });
-
-        const token = await authService.createToken(agency, "agency");
+        
+        const responseAgency = {
+            role: 'agency',
+            _id: agency._id,
+            agencyName: agencyName.agencyName,
+            email: agency.email,
+            city: agency.city,
+            address: agency.address,
+            phoneNumber: agency.phoneNumber
+        }
+        console.log(responseAgency);
+        const token = await authService.createToken(responseAgency, "agency");
 
         const cookieSettings = { httpOnly: true }
 
@@ -120,13 +139,13 @@ router.post('/register/agency', async (req, res) => {
         res.json({ status: 200, agency });
 
     } catch (error) {
-        console.log(error);
         res.status(400).json({ status: 400, ...error });
     }
 
 });
 
 router.get('/logout', (req, res) => {
+
     res.clearCookie(COOKIE_SESSION_NAME, {
         path: '/',
         httpOnly: true,
@@ -148,11 +167,9 @@ router.get('/me', async (req, res) => {
         return res.status(200).json({ status: 200, user: { ...decodedToken } })
 
     } catch (error) {
-        console.log(error);
         res.clearCookie(COOKIE_SESSION_NAME);
         res.status(400).json({ status: 400, ...error });
     }
 });
-
 
 module.exports = router;
