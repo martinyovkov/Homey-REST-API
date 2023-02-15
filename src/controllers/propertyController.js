@@ -157,6 +157,7 @@ router.patch('/:_id',
     OnlyAgency.bind(null, 'Only agencies are allowed to edit properties'),
     IsOwner.bind(null, searchSources.params, 'You need to be owner to edit this property'),
     (req, res) => {
+        console.log('in');
         uploadImage(req, res, async function (err) {
             console.log(err);
             if (err) { return res.json({ message: err.message }) }
