@@ -43,7 +43,6 @@ router.post('/login', async (req, res) => {
         const cookieSettings = { httpOnly: true }
 
         if (process.env.ENVIRONMENT !== 'development') {
-            app.set('trust proxy', 1)
             cookieSettings.secure = true
             cookieSettings.sameSite = 'none'
         }
@@ -79,7 +78,6 @@ router.post('/register/user', async (req, res) => {
         const cookieSettings = { httpOnly: true }
 
         if (process.env.ENVIRONMENT !== 'development') {
-            app.set('trust proxy', 1)
             cookieSettings.secure = true
             cookieSettings.sameSite = 'none'
         }
