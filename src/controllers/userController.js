@@ -82,7 +82,7 @@ router.post('/register/user', async (req, res) => {
             address: user.address,
             phoneNumber: user.phoneNumber
         }
-
+        console.log(responseUser);
         const token = await authService.createToken(responseUser, "user");
 
         const cookieSettings = { httpOnly: true }
@@ -97,6 +97,7 @@ router.post('/register/user', async (req, res) => {
         res.json({ status: 200, user });
 
     } catch (error) {
+        console.log(error);
         res.status(400).json({ status: 400, ...error });
     }
 
@@ -126,7 +127,7 @@ router.post('/register/agency', async (req, res) => {
             address: agency.address,
             phoneNumber: agency.phoneNumber
         }
-
+        console.log(responseAgency);
         const token = await authService.createToken(responseAgency, "agency");
 
         const cookieSettings = { httpOnly: true }
