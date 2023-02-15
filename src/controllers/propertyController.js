@@ -158,7 +158,7 @@ router.patch('/:_id',
     IsOwner.bind(null, searchSources.params, 'You need to be owner to edit this property'),
     (req, res) => {
         uploadImage(req, res, async function (err) {
-
+            console.log(err);
             if (err) { return res.json({ message: err.message }) }
 
             const propertyDetails = req.body;
