@@ -104,7 +104,8 @@ router.post('/filtered', async (req, res) => {
             }
         }
 
-        const meta = await propertyService.getMetadataByFilter(req.body, false)
+        //const meta = await propertyService.getMetadataByFilter(req.body, false)
+        const meta = await propertyService.getMetaDataFromProperties(properties)
         
         meta.pages = pageSize ? Math.ceil(properties.length / pageSize) : properties.length
         
