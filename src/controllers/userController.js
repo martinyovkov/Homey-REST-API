@@ -75,20 +75,19 @@ router.post('/register/user', async (req, res) => {
         const user = await authService.create('User', { email, firstName, lastName, password });
 
         const responseUser = {
-            role: user.role,
+            role: 'user',
             _id: user._id,
             email: user.email,
             city: user.city,
-            address: user.address,
-            phoneNumber: user.phoneNumber
+            firstName: user.firstName,
+            lastName: user.lastName
         }
-        console.log(responseUser);
+        
         const token = await authService.createToken(responseUser, "user");
 
         const cookieSettings = { httpOnly: true }
 
         if (process.env.ENVIRONMENT !== 'development') {
-            app.set('trust proxy', 1)
             cookieSettings.secure = true
             cookieSettings.sameSite = 'none'
         }
@@ -119,7 +118,7 @@ router.post('/register/agency', async (req, res) => {
         const agency = await authService.create('Agency', { email, agencyName, city, address, phoneNumber, password });
         
         const responseAgency = {
-            role: agency.role,
+            role: 'agency',
             _id: agency._id,
             agencyName: agencyName.agencyName,
             email: agency.email,
