@@ -53,6 +53,7 @@ router.post('/login', async (req, res) => {
         res.status(200).json(responseUser);
 
     } catch (error) {
+        console.log(error);
         res.status(400).json({ status: 400, ...error });
     }
 
