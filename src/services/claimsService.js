@@ -16,3 +16,15 @@ exports.getByProperties = (properties) => Claim.find({ property_id: { $in: prope
     .then(claims => claims)
     .catch(err => { throw normalize('Claim fetch error!', err) })
 
+exports.getFiltered = (claims, populate = false) => {
+
+    let query = Claim.find({ name: { $in: Array.isArray(claims) ? claims : [claims] } })
+    
+    if (populate) {
+        query = query.populate('property_id')
+    }
+    
+    return query.lean()
+        .then(claims => claims)
+        .catch(err => { throw normalize('Claim fetch error!', err) })
+}

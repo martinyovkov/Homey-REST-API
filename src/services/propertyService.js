@@ -46,18 +46,6 @@ exports.getFiltered = async (filter) => {
 
     const findQuery = buildFindQueryByFilter(filter);
 
-    const { page, pageSize } = filter
-
-    if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
-
-        try {
-            return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password' }).lean()
-                .skip((page - 1) * pageSize)
-                .limit(pageSize)
-
-        } catch (error) { return [] }
-    }
-
     try { return await Property.find(findQuery).populate({ path: 'agency_id', select: '-password' }).lean() }
     catch (error) { return [] }
 }

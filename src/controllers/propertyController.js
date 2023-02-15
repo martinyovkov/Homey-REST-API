@@ -82,16 +82,41 @@ router.get('/:_id', async (req, res) => {
 
 router.post('/filtered', async (req, res) => {
 
+    const { page, pageSize, ...rest } = req.body
     try {
-        let properties = await propertyService.getFiltered(req.body)
 
-        properties = await attachImages(properties)
-        properties = await attachClaims(properties);
+        let hasClaims = Boolean(req.body.claims && req.body.claims.length > 0);
+        let propertiesWithFilterClaims = null;
+
+        let properties = await propertyService.getFiltered(hasClaims ? rest : req.body)
+
+        if (hasClaims) {
+            let filteredClaims = await claimsService.getFiltered(req.body.claims, true)
+
+            propertiesWithFilterClaims = filteredClaims.filter(c => c.property_id).map(c => c.property_id._id)
+
+            if (properties.length === 0) {
+                properties = propertiesWithFilterClaims
+            } else {
+                properties = properties.filter(p => propertiesWithFilterClaims
+                    .some(pc => pc._id.toString() === p._id.toString())
+                )
+            }
+        }
 
         const meta = await propertyService.getMetadataByFilter(req.body, false)
-
+        
+        meta.pages = pageSize ? Math.ceil(properties.length / pageSize) : properties.length
+        
+        if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
+            properties = properties.slice((page - 1) * pageSize, page * pageSize)
+        }
+        
+        properties = await attachImages(properties)
+        properties = await attachClaims(properties);
+        
         res.json({ properties, meta })
-    } catch (error) { console.log(error); res.status(400).json(error) }
+    } catch (error) { console.log(error); res.status(400).json(error || 'Invalid filtering') }
 
 })
 
@@ -102,6 +127,7 @@ router.post('/',
         uploadImage(req, res, async function (err) {
 
             const propertyDetails = req.body;
+            console.log(req.user);
             propertyDetails.agency_id = req.user._id;
 
             let property;
