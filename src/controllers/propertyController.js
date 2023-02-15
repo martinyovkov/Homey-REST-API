@@ -72,7 +72,7 @@ router.get('/top', async (req, res) => {
 router.get('/:_id', async (req, res) => {
     try {
         let property = await propertyService.getById(req.params._id)
-        
+
         property = await attachImages([property])
         property = await attachClaims(property);
 
@@ -146,7 +146,7 @@ router.post('/',
             catch (error) { return res.json({ message: error }) }
 
             property.images = req.files.map(f => f.filename);
-            
+
             res.json(property)
         })
     }
@@ -167,13 +167,19 @@ router.patch('/:_id',
             let property;
             try {
                 property = await propertyService.edit(propertyDetails)
-                
+
                 if (propertyDetails.claims) {
+
+                    propertyDetails.claims = Array.isArray(propertyDetails.claims)
+                        ? propertyDetails.claims
+                        : [propertyDetails.claims];
+
                     propertyDetails.claims = propertyDetails.claims.map(c => ({ name: c, value: c, property_id: property._id }))
                     await claimsService.deleteAllByProperty(propertyDetails._id);
                     property.claims = await claimsService.create(propertyDetails.claims)
                 }
             } catch (error) {
+                console.log(error);
                 req.files.forEach(f => { deleteFile('images', f.filename) })
 
                 return res.status(400).json(error)
@@ -229,7 +235,7 @@ async function attachImages(properties) {
 }
 
 async function attachClaims(properties) {
-    
+
     try {
         properties = properties.map(p => ({ ...p, claims: [] }))
 
@@ -240,7 +246,7 @@ async function attachClaims(properties) {
                 .forEach(p => p.claims.push(c))
 
         })
-        
+
         return properties
     } catch (error) { return [] }
 
