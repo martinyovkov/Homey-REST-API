@@ -53,7 +53,8 @@ router.post('/login', async (req, res) => {
         res.status(200).json(responseUser);
 
     } catch (error) {
-        res.status(400).json({ status: 400, ...error });
+        console.log(error);
+        res.status(400).json({ status: 400, error });
     }
 
 });
@@ -87,7 +88,8 @@ router.post('/register/user', async (req, res) => {
         res.json({ status: 200, user });
 
     } catch (error) {
-        res.status(400).json({ status: 400, ...error });
+        console.log(error);
+        res.status(400).json({ status: 400, error });
     }
 
 });
@@ -120,6 +122,7 @@ router.post('/register/agency', async (req, res) => {
         res.json({ status: 200, agency });
 
     } catch (error) {
+        console.log(error);
         res.status(400).json({ status: 400, ...error });
     }
 
@@ -142,6 +145,7 @@ router.get('/me', async (req, res) => {
         return res.status(200).json({ status: 200, user: { ...decodedToken } })
 
     } catch (error) {
+        console.log(error);
         res.clearCookie(COOKIE_SESSION_NAME);
         res.status(400).json({ status: 400, ...error });
     }
