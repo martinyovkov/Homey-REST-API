@@ -102,6 +102,7 @@ router.post('/',
         uploadImage(req, res, async function (err) {
 
             const propertyDetails = req.body;
+            console.log(req.user);
             propertyDetails.agency_id = req.user._id;
 
             let property;
