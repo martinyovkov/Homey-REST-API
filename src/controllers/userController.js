@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = await authService.createToken(responseUser, user.role);
-
+        console.log();
         const cookieSettings = { httpOnly: true }
 
         if (process.env.ENVIRONMENT !== 'development') {
@@ -107,7 +107,8 @@ router.post('/register/agency', async (req, res) => {
         if (user) { throw { message: 'This email already exists!' } }
 
         const agency = await authService.create('Agency', { email, agencyName, city, address, phoneNumber, password });
-
+        console.log(agency)
+        console.log(agency._doc)
         const token = await authService.createToken(agency, "agency");
 
         const cookieSettings = { httpOnly: true }
