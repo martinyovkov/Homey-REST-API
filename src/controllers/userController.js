@@ -127,7 +127,12 @@ router.post('/register/agency', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-    res.clearCookie(COOKIE_SESSION_NAME, { path: '/' });
+    res.clearCookie(COOKIE_SESSION_NAME, {
+        path: '/',
+        httpOnly: true,
+        secure: process.env.ENVIRONMENT != "development",
+        sameSite: 'none',
+    });
     res.status(200).json({ message: 'Logged out!' })
 });
 
