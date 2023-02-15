@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 
 require('dotenv').config();
+console.log(process.env);
 
 const PORT = process.env.PORT || 3001;
 
@@ -24,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(router);
-console.log(process.env);
+
 dbInit()
     .then(() => {
         app.listen(PORT, () => console.log(`Server is listening on port: ${PORT}`))
