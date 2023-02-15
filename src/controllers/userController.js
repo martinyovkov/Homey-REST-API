@@ -61,7 +61,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/register/user', async (req, res) => {
     const { email, firstName, lastName, password, rePassword } = req.body;
-    
+
     if (password !== rePassword) {
         return res.status(400).json({ status: 400, message: 'Password mismatch!' })
     }
@@ -127,7 +127,7 @@ router.post('/register/agency', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-    res.clearCookie(COOKIE_SESSION_NAME);
+    res.clearCookie(COOKIE_SESSION_NAME, { path: '/' });
     res.status(200).json({ message: 'Logged out!' })
 });
 
