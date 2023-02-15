@@ -129,7 +129,7 @@ router.post('/register/agency', async (req, res) => {
 router.get('/logout', (req, res) => {
     console.log(req.cookies[COOKIE_SESSION_NAME]);
     res.clearCookie(COOKIE_SESSION_NAME, { path: '/' });
-    res.status(200).json({ message: 'Logged out!' })
+    res.status(200).json({ domain: 'homey-rest-api.herokuapp.com', message: 'Logged out!' })
 });
 
 router.get('/me', async (req, res) => {
