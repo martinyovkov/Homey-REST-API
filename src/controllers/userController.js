@@ -125,7 +125,7 @@ router.post('/register/agency', async (req, res) => {
             address: agency.address,
             phoneNumber: agency.phoneNumber
         }
-        console.log(responseAgency);
+        
         const token = await authService.createToken(responseAgency, "agency");
 
         const cookieSettings = { httpOnly: true }
