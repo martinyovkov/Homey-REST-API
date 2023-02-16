@@ -81,7 +81,7 @@ router.post('/register/user', async (req, res) => {
             firstName: user.firstName,
             lastName: user.lastName
         }
-        
+
         const token = await authService.createToken(responseUser, "user");
 
         const cookieSettings = { httpOnly: true }
@@ -115,7 +115,7 @@ router.post('/register/agency', async (req, res) => {
         if (user) { throw { message: 'This email already exists!' } }
 
         const agency = await authService.create('Agency', { email, agencyName, city, address, phoneNumber, password });
-        
+
         const responseAgency = {
             role: 'agency',
             _id: agency._id,
@@ -125,7 +125,7 @@ router.post('/register/agency', async (req, res) => {
             address: agency.address,
             phoneNumber: agency.phoneNumber
         }
-        
+
         const token = await authService.createToken(responseAgency, "agency");
 
         const cookieSettings = { httpOnly: true }
@@ -145,13 +145,19 @@ router.post('/register/agency', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-    res.clearCookie(COOKIE_SESSION_NAME);
-    // res.clearCookie(COOKIE_SESSION_NAME, {
-    //     path: '/',
-    //     httpOnly: true,
-    //     secure: process.env.ENVIRONMENT != "development",
-    //     sameSite: 'none',
-    // });
+
+    const cookieSettings = {
+        path: '/',
+        httpOnly: true,
+    };
+
+    if (process.env.ENVIRONMENT !== 'development') {
+        cookieSettings.secure = true
+        cookieSettings.sameSite = 'none'
+    }
+
+    res.clearCookie(COOKIE_SESSION_NAME, cookieSettings);
+
     res.status(200).json({ message: 'Logged out!' })
 });
 
