@@ -154,7 +154,7 @@ router.post('/',
             try {
                 if (propertyDetails.claims) {
                     try {
-                        claimsService.create(Array.isArray(propertyDetails.claims) ? propertyDetails.claims : [propertyDetails.claims]
+                        claimsService.create((Array.isArray(propertyDetails.claims) ? propertyDetails.claims : [propertyDetails.claims])
                             .map(claim => ({ name: claim, value: claim, property_id: property._id }))
                         )
                     } catch (error) {
