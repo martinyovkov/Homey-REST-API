@@ -2,7 +2,7 @@ const Claim = require("../models/Claim");
 
 const { normalize } = require("../utils/mongoErrorNormalizer");
 
-exports.create = (claims) => Claim.create(claims)
+exports.create = (claims) => Claim.create(Array.isArray(claims) ? claims : [claims])
     .then(claim => claim)
     .catch(err => { throw normalize('Claims creation error!', err) })
 

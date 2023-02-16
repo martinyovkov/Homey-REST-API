@@ -106,16 +106,16 @@ router.post('/filtered', async (req, res) => {
 
         //const meta = await propertyService.getMetadataByFilter(req.body, false)
         const meta = await propertyService.getMetaDataFromProperties(properties)
-        
+
         meta.pages = pageSize ? Math.ceil(properties.length / pageSize) : properties.length
-        
+
         if (page && pageSize && !isNaN(page) && !isNaN(pageSize)) {
             properties = properties.slice((page - 1) * pageSize, page * pageSize)
         }
-        
+
         properties = await attachImages(properties)
         properties = await attachClaims(properties);
-        
+
         res.json({ properties, meta })
     } catch (error) { console.log(error); res.status(400).json(error || 'Invalid filtering') }
 
@@ -126,6 +126,7 @@ router.post('/',
     OnlyAgency.bind(null, 'Only agencies are allowed to add properties'),
     (req, res) => {
         uploadImage(req, res, async function (err) {
+            console.log(err);
 
             const propertyDetails = req.body;
             console.log(req.user);
@@ -135,6 +136,7 @@ router.post('/',
 
             try { property = await propertyService.create(propertyDetails) }
             catch (error) {
+                console.log(error);
                 if (!err) {
                     req.files.forEach(f => { deleteFile('images', f.filename) })
                 }
@@ -152,16 +154,18 @@ router.post('/',
             try {
                 if (propertyDetails.claims) {
                     try {
-                        claimsService.create(propertyDetails.claims
+                        claimsService.create(Array.isArray(propertyDetails.claims) ? propertyDetails.claims : [propertyDetails.claims]
                             .map(claim => ({ name: claim, value: claim, property_id: property._id }))
                         )
                     } catch (error) {
+                        console.log(error);
                         await propertyService.delete(property._id)
                         return res.json({ message: err.message })
                     }
                 }
 
             } catch (error) {
+                console.log(error);
                 if (!err) {
                     req.files.forEach(f => { deleteFile('images', f.filename) })
                 }
@@ -170,7 +174,7 @@ router.post('/',
             }
 
             try { req.files.forEach(file => { imagesService.create(file.filename, property._id) }) }
-            catch (error) { return res.json({ message: error }) }
+            catch (error) { console.log(error); return res.json({ message: error }) }
 
             property.images = req.files.map(f => f.filename);
 
