@@ -115,6 +115,7 @@ router.post('/filtered', async (req, res) => {
         
         properties = await attachImages(properties)
         properties = await attachClaims(properties);
+        console.log(properties, 3);
         
         res.json({ properties, meta })
     } catch (error) { console.log(error); res.status(400).json(error || 'Invalid filtering') }
