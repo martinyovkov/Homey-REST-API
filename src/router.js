@@ -5,7 +5,7 @@ const propertyController = require('./controllers/propertyController');
 const imageController = require('./controllers/imageController');
 
 router.use(userController);
-router.use('/properties', propertyController);
-router.use('/images', imageController);
+router.use('property', propertyController);
+router.use( imageController );
 
 module.exports = router;
